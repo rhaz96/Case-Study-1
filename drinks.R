@@ -1,0 +1,93 @@
+library(XML)
+library(rvest)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library (openintro)
+library(psych)
+library(doBy)
+library(pastecs)
+library(gridExtra)
+library(grid)
+dr1=html('http://scottjanish.com/map-per-capita-gallons-beer-consumed-per-adult-state')
+drinks  <- dr1 %>%  html_nodes("td") %>% html_text()
+str(drinks)
+x <- seq(1,101,2)
+States <- drinks[x]
+y <- seq(2,102,2)
+Consumption <- as.numeric(drinks[y])
+dr2<-dplyr::data_frame(States,Consumption)
+str(dr2)
+dr2$State <- state2abbr(dr2$States) 
+dr2 <- dr2[order(-dr2$Consumption),] 
+tail(dr2)
+drh <- dr2[1:10,c(1,2)]
+drl <- dr2[42:51,c(1,2)]
+grid.table(drh,rows = NULL)
+grid.table(drl,rows=NULL)
+
+getwd()
+setwd("c:/Users/jhold/Desktop/case study 1")
+beers <- read_csv("c:/Users/jhold/Desktop/case study 1/Beers.csv")
+brewers <- read_csv("c:/Users/jhold/Desktop/case study 1/Breweries.csv")
+str(beers)
+str(brewers)
+head(beers)
+BrewersbyState <- brewers$State
+CntState <- count(BrewersbyState)
+CntState <- CntState[order(-CntState$freq),] 
+str(CntState)
+TotCNT <- sum(CntState$freq)
+Brewtot <- merge(beers, brewers, by.x = "Brewery_id", by.y = "Brew_ID")
+cntbeers <- count(Brewtot$State)
+cntbeers <- cntbeers[order(-cntbeers$freq),] 
+totbeers <- sum(cntbeers$freq)
+str(Brewtot)
+head(Brewtot)
+tail(Brewtot)
+MissTot <- sapply(Brewtot, function(x) sum(is.na(x)))
+describeBy(Brewtot$ABV,Brewtot$State)
+MedA <- aggregate (Brewtot$ABV, list(Brewtot$State), median, na.rm=TRUE)
+str(MedA)
+ggplot(data=MedA, aes(x=reorder(Group.1, x), y=x, fill=Group.1)) +geom_bar(stat="identity") +coord_flip() +ylab("Median ABV") + xlab("State Name") +ggtitle("Median ABV by State")+ theme(plot.title = element_text(hjust = 0.5)) + theme(legend.position="none")
+MedI <- aggregate (Brewtot$IBU, list(Brewtot$State), median, na.rm=TRUE)
+MedI <- MedI[-c(42),]
+ggplot(data=MedI, aes(x=reorder(Group.1, x), y=x, fill=Group.1)) +geom_bar(stat="identity") +coord_flip() +ylab("Median IBU") + xlab("State Name") +ggtitle("Median IBU by State")+ theme(plot.title = element_text(hjust = 0.5)) + theme(legend.position="none")
+hist(Brewtot$ABV, main="Distribution of ABV", breaks=20, xlab="Alcohol by Volume", border="black", col="blue", xlim=c(.02,.13)) 
+hist(Brewtot$IBU, main="Distribution of IBU", breaks=20, xlab="International Bitterness Units", border="black", col="red", xlim=c(0,100))
+describe(Brewtot$ABV, na.rm = TRUE,quant=c(.05,.10,.25,.75,.90,.95))
+describe(Brewtot$IBU, na.rm = TRUE,quant=c(.05,.10,.25,.75,.90,.95))
+summary(Brewtot$ABV)
+Brewtot <- Brewtot[order(-Brewtot$ABV),] 
+Brewtot <- Brewtot[order(-Brewtot$IBU),] 
+head(Brewtot)
+MedA <- MedA[order(-MedA$x),] 
+options(scipen=100)
+stat.desc(Brewtot$ABV)
+stat.desc(Brewtot$IBU)
+MedI <- MedI[order(-MedI$x),] 
+ggplot(data=Brewtot, aes(x=ABV, y=IBU)) +geom_point(shape = 16, size = 5) +ylab("IBU") + xlab("ABV") +ggtitle("Craft Beer IBU by ABV")+ theme(plot.title = element_text(hjust = 0.5))
+ggplot(data=Brewtot, aes(x=IBU, y=ABV)) +geom_point(shape = 16, size = 2, color="blue") + stat_smooth(method = 'lm', color='red') + labs(title = 'Craft Beer IBU by ABV') + theme(plot.title = element_text(hjust = 0.5))
+ggplot(data=Brewtot, aes(x=ABV, y=IBU)) +geom_point(shape = 16, size = 2, color="blue") + stat_smooth(method = 'lm', color='red') + labs(title = 'Craft Beer IBU by ABV') + theme(plot.title = element_text(hjust = 0.5))
+cor.test( ~ ABV + IBU,data=Brewtot,method = "pearson")
+model = lm(IBU ~ ABV, data = Brewtot)
+df <- merge(CntState,cntbeers, by.x ='x', by.y='x')
+names(df) <- c("State", "Breweries", "Unique Brews")
+df$StateName <- abbr2state(df$State) 
+df <- df[order(-df$Breweries),] 
+str(df)
+dfh <-df[1:10,c(4,2,3)]
+dfl <-df[42:51,c(4,2,3)]  
+grid.table(dfh,rows = NULL)
+grid.table(dfl,rows=NULL)
+str(dfh)
+
+dplyr::tbl_df(dfh)
+summary(model)
+str(MedA)
+dr3 <- merge(dr2,MedI, by.x="state", by.y="Group.1")
+str(dr3)
+dr4 <- merge(dr3, MedA, by.x="state", by.y="Group.1")
+str(dr4)
+cor.test( ~ cons + x.x,data=dr4,method = "pearson")
+cor.test( ~ cons + x.y,data=dr4,method = "pearson")
