@@ -13,10 +13,10 @@ Key variables from *Beers.csv*:
 * IBU = International Bitterness Units
 * Brewery_ID = unique brewery identifier
 
-Key Variables from *Brewers.csv*
+Key Variables from *Brewers.csv:*
 * State = State in which the beer was produced 
 * Brew_ID = unique brewery identifier
 
 Files are merged based on unique brewery ID
 
-Note: for the purposes of this project additional data was identified from the web to help frame an understanding of beer consumption by state. This data can be found [here](http://scottjanish.com/map-per-capita-gallons-beer-consumed-per-adult-state)
+Note: for the purposes of this project additional data was identified from the web to help frame an understanding of beer consumption by state. This data can be found [here](http://scottjanish.com/map-per-capita-gallons-beer-consumed-per-adult-state).
