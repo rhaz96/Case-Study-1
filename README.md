@@ -16,7 +16,7 @@ Key variables from Beers.csv
   Brew_ID = unique brewery identifier
 Files merged based on unique brewery ID
 
-Note: for the purposes of this project additional data was identified from the web to help frame and understanding of beer consumption by state. This data is found at URL=http://scottjanish.com/map-per-capita-gallons-beer-consumed-per-adult-state
+Note: for the purposes of this project additional data was identified from the web to help frame an understanding of beer consumption by state. This data is found at URL=http://scottjanish.com/map-per-capita-gallons-beer-consumed-per-adult-state
 
 The included HTML file includes commentary, graphics, and code
 The include powerpoint file is the overall integration of visual and statistical information
