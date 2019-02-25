@@ -1,14 +1,3 @@
----
-title: "Case Study 1 Initial"
-author: "Jim Holdnack"
-date: "February 23, 2019"
-output:
-  html_document:
-    keep_md: yes
-  keep_md: default
----
-
-
 ### XYZ Brewery Porposal
 According to Fortune.com1: US Craft Brew industry is worth $26 billion dollars in 2017
 This represents increases of 6.2 billion since 2015
