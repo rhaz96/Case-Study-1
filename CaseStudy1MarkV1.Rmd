@@ -1,0 +1,245 @@
+---
+title: "Case Study 1 Initial"
+author: "Jim Holdnack"
+date: "February 23, 2019"
+output:
+  html_document:
+    keep_md: yes
+  keep_md: default
+---
+
+
+### XYZ Brewery Porposal
+According to Fortune.com1: US Craft Brew industry is worth $26 billion dollars in 2017
+This represents increases of 6.2 billion since 2015
+The pace of growth is slowing but the opportunity is large
+Craft beer drinkers tend to support local independent breweries
+Consumers are becoming more selective
+Rising demand for low alcohol by volume (ABV) and flavored beer
+Each market share of .5% = $130 million in revenue
+
+STEP 1: "Competitive Landscape" Evaluate current production of craft brews regionally
+How many craft breweries are currently producing in the US?
+
+
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+## obtain data needed to evaluate competitive landscape and load into R
+getwd()
+setwd("c:/Users/jhold/Desktop/case study 1")
+library(tidyverse)
+beers <- read_csv("c:/Users/jhold/Desktop/case study 1/Beers.csv")
+brewers <- read_csv("c:/Users/jhold/Desktop/case study 1/Breweries.csv")
+#check content of files before analysis
+str(beers)
+str(brewers)
+# How many breweries are in the US
+length(brewers$State)
+
+
+
+```
+### Combine multiple data sources to provide richer understanding of craft brewering in US
+Check integrity of data files
+evaluate missing data
+
+```{r, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+# fully analyze data by combining different data sets
+Brewtot <- merge(beers, brewers, by.x = "Brewery_id", by.y = "Brew_ID")
+# check integrity of combined files and evaluate variable features
+head(Brewtot,6)
+tail(Brewtot,6)
+str(Brewtot)
+### Determine market saturation by state for breweries and beers brewed
+library(plyr)
+BrewersbyState <- brewers$State
+CntState <- count(brewers$State)
+cntbeers <- count(Brewtot$State)
+df <- merge(CntState,cntbeers, by.x ='x', by.y='x')
+names(df) <- c("State", "Breweries", "Unique Brews")
+library (openintro)
+library(gridExtra)
+library(grid)
+df$StateName <- abbr2state(df$State) 
+df <- df[order(-df$Breweries),] 
+dft <- df[,c(4,2,3)]
+grid.table(dft,rows = NULL)
+```
+### Tables must be separately generated
+```{r, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+dfh <-df[1:10,c(4,2,3)]
+grid.table(dfh,rows = NULL)
+```
+
+```{r, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+dfl <-df[42:51,c(4,2,3)]  
+grid.table(dfl,rows=NULL)
+```
+
+# Evaluate for missing data points
+
+
+```{r, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+MissTot <- sapply(Brewtot, function(x) sum(is.na(x)))
+MissTot
+# IBU's have a high rate of missing data which may effect analyses of these data points
+
+```
+
+## Summary of Brewery data
+The Top 5 States for number of breweries are:
+Colorado = 42,  California=  39, Michigan= 32, Oregon= 29, Texas= 28
+States with only 1 craft brewery are:
+District of Columbia, North Dakota, South Dakota, and West Virginia
+There are 2410 unique craft beers brewed across the US
+The Top 5 States for number of unique beers brewed are:
+Colorado= 265, California= 183, Michigan= 162, Indiana=139, Texas= 130
+The lowest 5 States for number of unique beers brewed are:
+Tennessee= 6, Arizona=5, North Dakota=3, Delaware=2, West Virginia=2
+
+
+
+## Are there regional differences in beer characteristics
+Median Alcohol by Volume (ABV) and median International Bitterness Unit (IBU) inform about the average characteristics of craft beers
+What is the distribution of ABV and IBU and what does that tell us about beer brewing in the US market
+What is the median ABV for each state?
+What is the median IBU for each state?
+
+
+```{r, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+MedA<- aggregate (Brewtot$ABV, list(Brewtot$State), median, na.rm=TRUE)
+MedI <- aggregate (Brewtot$IBU, list(Brewtot$State), median, na.rm=TRUE)
+
+MedA
+MedI
+#### South Dakota is missing IBU data and will be dropped as a data point
+MedI <- MedI[-c(42),]
+## evaluate the frequency distributions of ABV and IBU 
+hist(Brewtot$ABV, main="Distribution of ABV", breaks=20, xlab="Alcohol by Volume", border="black", col="blue", xlim=c(.02,.13)) 
+hist(Brewtot$IBU, main="Distribution of IBU", breaks=20, xlab="International Bitterness Units", border="black", col="red", xlim=c(0,100))
+## Both ABV and IBU's are positively skewed. Most brews have a low to moderate IBU and ABV while a subset of Beers are high in ABV and/or IBU
+## Evaluate beer characteristics by state to determine if thwere any regional effects to consider
+ggplot(data=MedA, aes(x=reorder(Group.1, x), y=x, fill=Group.1)) +geom_bar(stat="identity") +coord_flip() +ylab("Median ABV") + xlab("State Name") +ggtitle("Median ABV by State")+ theme(plot.title = element_text(hjust = 0.5)) + theme(legend.position="none")
+ggplot(data=MedI, aes(x=reorder(Group.1, x), y=x, fill=Group.1)) +geom_bar(stat="identity") +coord_flip() +ylab("Median IBU") + xlab("State Name") +ggtitle("Median IBU by State")+ theme(plot.title = element_text(hjust = 0.5)) + theme(legend.position="none")
+## Evaluate alcohol level
+Brewtot <- Brewtot[order(-Brewtot$ABV),] 
+##Most alcohol by volume beer is Colorado
+head(Brewtot,1)
+## highest 5 and lowest 5 state median abv's
+MedA <- MedA[order(-MedA$x),] 
+names(MedA) <- c("State", "ABV")
+head(MedA,5)
+tail(MedA,5)
+## basic statistics for ABV use pastecs for standard deviation and to check standard error of the mean
+library(pastecs)
+options(scipen=100)
+stat.desc(Brewtot$ABV)
+### Evaluate IBU level
+Brewtot <- Brewtot[order(-Brewtot$IBU),] 
+## Most bitter beer by IBU is brewed in 
+head(Brewtot,1)
+## highest 5 and lowest 5 state median IBU's
+MedI <- MedI[order(-MedI$x),] 
+names(MedI) <- c("State", "IBU")
+head(MedI,5)
+tail(MedI,5)
+stat.desc(Brewtot$IBU)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+#### Beer Characteristcs overall and by State
+### ABV Data
+Highest ABV reported = .128 
+Lee Hill Series Vol. 5 - Belgian Style Quadrupel, Upslope Brewing Company      Boulder, CO
+Overall ABV Characteristics
+Mean= 0.0598, Median=.056, Standard Deviation=0135
+States with Highest Average (median) ABV:
+District of Columbia=.0625, Kentucky=.0625, Michigan=.062,
+   New Mexico=.62, and West Virginia=.62
+States with Lowest Average (median) ABV:
+Kansas=.05, North Dakota=.05, Wyoming=.05, New Jersey=.046, and Utah=.04
+
+### IBU Data
+Highest IBU reported = 138 
+Bitter Bitch Imperial IPA, American Double / Imperial IPA, Astoria Brewing Company Astoria, OR
+Mean=42.7, Median=35.0, Standard Deviation=25.9
+States with Highest Average (median) IBU:
+Maine=61.0, West Virginia=57.5, Florida=55.0, Georgia=55.0, Delaware=52.0
+States with Lowest Average (median) IBU:
+Hawaii=22.5, Wyoming=21.0, Arizona=20.5, Kansas=20.0, and Wisconsin=19.0
+
+
+#### what is the relationship between ABV and IBU
+
+```{r, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+### plot of ABV by IBU
+ggplot(data=Brewtot, aes(x=IBU, y=ABV)) +geom_point(shape = 16, size = 2, color="blue") + stat_smooth(method = 'lm', color='red') + labs(title = 'Craft Beer IBU by ABV') + theme(plot.title = element_text(hjust = 0.5))
+### correlation test of limear relationship
+cor.test( ~ ABV + IBU,data=Brewtot,method = "pearson")
+
+
+```
+
+
+#### Plot of IBU versus ABV
+Shows a general positive trend with higher Abv associated with higher levels of IBU
+The regression line illustrates that the variability may be changing along the prediction line (heteroscedasticity)
+    This is exemplified by the fact that beers of 5% ABV or lower tend to have low to moderate IBU and not high levels of IBU
+    However, at ABV of 7.5 and higher, you get a full range of IBU's meaning that it is possible to have high ABV low IBU beers
+    Note: this coreelation does not show causation as the relationship may be affect by third variables such as ingredients used, 
+     fermentaiton process, and marketing needs
+     
+### Data regarding consumption is helpful to make business plans
+additional data was scraped from URL=http://scottjanish.com/map-per-capita-gallons-beer-consumed-per-adult-state
+
+
+```{r, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+### scraping web data on consumption
+library(XML)
+library(rvest)
+dr1=html('http://scottjanish.com/map-per-capita-gallons-beer-consumed-per-adult-state')
+drinks  <- dr1 %>%  html_nodes("td") %>% html_text()
+str(drinks)
+x <- seq(1,101,2)
+States <- drinks[x]
+y <- seq(2,102,2)
+Consumption <- as.numeric(drinks[y])
+dr2<-dplyr::data_frame(States,Consumption)
+str(dr2)
+dr2$State <- state2abbr(dr2$States) 
+dr2 <- dr2[order(-dr2$Consumption),] 
+head(dr2)
+tail(dr2)
+drh <- dr2[1:10,c(1,2)]
+drl <- dr2[42:51,c(1,2)]
+
+```
+
+#### Regions with higher consumption rates fall in the least saturated category (ND,SD)
+Montana is regionally close. 
+Competition from Colorado & Wisconsin
+
+```{r, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+grid.table(drh,rows = NULL)
+```
+#### Consumption in gallons per adult
+```{r, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+grid.table(drl,rows=NULL)
+```
+#### Consumption in gallons per adult
