@@ -1,4 +1,5 @@
 # Analysis of Beer
+## Authors: Jim Holdnack, Robert Hazell
 
 This is a class project for MSDS 6371 Doing Data Science, the purpose of which is to illustrate data cleaning, data analysis, and project management skills. 
 
