@@ -437,7 +437,7 @@ hist(Brewtot$IBU, main="Distribution of IBU", breaks=20, xlab="International Bit
 
 Both ABV and IBU are right skewed. Most brews have a low to moderate IBU and ABV while a subset of beers are high in ABV and/or IBU.
 
-For a more granular view, median ABV and median IBU is plotted according to state,,
+For a more granular view, median ABV and median IBU is plotted according to state.
 ```r
 ## Evaluate beer characteristics by state to determine if thwere any regional effects to consider
 ggplot(data=MedA, aes(x=reorder(Group.1, x), y=x, fill=Group.1)) +geom_bar(stat="identity") +coord_flip() +ylab("Median ABV") + xlab("State Name") +ggtitle("Median ABV by State")+ theme(plot.title = element_text(hjust = 0.5)) + theme(legend.position="none")
